@@ -3,139 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent Sample UI - CopilotKit Chat</title>
+  <title>Agent Sample UI</title>
   <style>
     body {
       margin: 0;
       padding: 20px;
       font-family: system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #f8f9fa;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
+      color: #333;
     }
     
     h1 {
-      color: white;
+      color: #333;
       text-align: center;
       margin-bottom: 30px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      font-weight: 300;
+      font-size: 2rem;
     }
     
     copilot-chat {
       width: 100%;
-      max-width: 900px;
+      max-width: 800px;
     }
     
-    .config-panel {
+    .status {
       background: white;
-      padding: 20px;
-      border-radius: 12px;
+      padding: 12px 20px;
+      border-radius: 8px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1px solid #e9ecef;
       width: 100%;
-      max-width: 900px;
-    }
-    
-    .config-panel h3 {
-      margin-top: 0;
-      color: #333;
-    }
-    
-    .config-row {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-      align-items: center;
-    }
-    
-    .config-row label {
-      min-width: 100px;
-      font-weight: 500;
-      color: #555;
-    }
-    
-    .config-row input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 2px solid #e9ecef;
-      border-radius: 6px;
+      max-width: 800px;
+      text-align: center;
       font-size: 14px;
+      color: #666;
     }
     
-    .config-row input:focus {
-      outline: none;
-      border-color: #667eea;
+    .status.connected {
+      color: #28a745;
     }
     
-    .update-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    
-    .update-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-    
-    .note {
-      background: #fff3cd;
-      border: 1px solid #ffeaa7;
-      padding: 15px;
-      border-radius: 6px;
-      margin-top: 15px;
-      font-size: 14px;
-      color: #856404;
+    .status.error {
+      color: #dc3545;
     }
   </style>
 </head>
 <body>
-  <h1>🤖 Agent Sample UI</h1>
+  <h1>Agent Sample UI</h1>
   
-  <div class="config-panel">
-    <h3>Configuration</h3>
-    <div class="config-row">
-      <label for="endpoint">Endpoint:</label>
-      <input type="text" id="endpoint" placeholder="http://localhost:8000/agno-agent" value="">
-    </div>
-    <div class="config-row">
-      <label for="apiKey">API Key:</label>
-      <input type="password" id="apiKey" placeholder="Optional API key" value="">
-    </div>
-    <button class="update-btn" onclick="updateChatConfig()">Update Configuration</button>
-    
-    <div class="note">
-      <strong>Note:</strong> Configure your backend endpoint above. For Ollama integration, you'll need a compatible backend service.
-      The component will connect to the specified endpoint for chat functionality.
-    </div>
+  <div class="status" id="status">
+    Connecting to backend...
   </div>
   
-  <copilot-chat id="chat" endpoint="" api-key=""></copilot-chat>
+  <copilot-chat id="chat" endpoint="http://localhost:8000/agno-agent" api-key=""></copilot-chat>
 
   <script type="module" src="/src/copilot-chat.ts"></script>
   
   <script>
-    function updateChatConfig() {
-      const endpoint = document.getElementById('endpoint').value;
-      const apiKey = document.getElementById('apiKey').value;
-      const chat = document.getElementById('chat');
-      
-      chat.setAttribute('endpoint', endpoint);
-      chat.setAttribute('api-key', apiKey);
-      
-      console.log('Updated chat configuration:', { endpoint, apiKey: apiKey ? '[HIDDEN]' : 'none' });
+    // Check backend status
+    async function checkBackendStatus() {
+      try {
+        const response = await fetch('http://localhost:8000/health');
+        const status = document.getElementById('status');
+        
+        if (response.ok) {
+          const health = await response.json();
+          status.textContent = `Connected to ${health.protocol || 'Backend'} - Agent Ready`;
+          status.className = 'status connected';
+        } else {
+          status.textContent = 'Backend connection failed';
+          status.className = 'status error';
+        }
+      } catch (error) {
+        const status = document.getElementById('status');
+        status.textContent = 'Backend offline - Make sure to run ./start.sh';
+        status.className = 'status error';
+      }
     }
     
-    // Set default values on load
+    // Check status on load and every 10 seconds
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('endpoint').value = 'http://localhost:8000/agno-agent';
-      updateChatConfig();
+      checkBackendStatus();
+      setInterval(checkBackendStatus, 10000);
     });
   </script>
 </body>
