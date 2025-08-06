@@ -1,0 +1,33 @@
+{
+  "name": "agent-sample-ui",
+  "version": "1.0.0",
+  "description": "Chat-based frontend using custom Lit elements with ag-ui and Ollama backend",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lit": "^3.1.0",
+    "@ag-ui/client": "^0.0.35"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "vite-plugin-dts": "^3.6.0"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "chat",
+    "ai",
+    "ollama",
+    "agent"
+  ],
+  "author": "",
+  "license": "MIT"
+}
